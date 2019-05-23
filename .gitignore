@@ -1,1 +1,3 @@
 line_detection/network-bsds500.pytorch
+line_detection/*.pyc
+output
