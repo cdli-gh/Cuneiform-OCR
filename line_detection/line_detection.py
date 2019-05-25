@@ -16,11 +16,14 @@ import torch
 
 from pytorch_hed import Network
 from sklearn.cluster import MeanShift, estimate_bandwidth
+from os.path import isfile, join
+from os import listdir
 
-BW_THRESHOLD = 30
-HLP_THRESHOLD = 5
-MIN_LINE_LENGTH = 10
-MAX_LINE_GAP = 5
+BW_THRESHOLD = 20
+HLP_THRESHOLD = 15
+MIN_LINE_LENGTH = 5
+MAX_LINE_GAP = 10
+VALID_EXT = [".jpg", ".png"]
 
 
 assert(int(str('').join(torch.__version__.split('.')[0:3])) >= 41) # requires at least pytorch version 0.4.1
@@ -119,8 +122,8 @@ def resize_image(image):
 	return final_img, rotate_flag
 
 #draw houghlines 
-def hough_line(image, original_img, flag):
-
+def hough_line(Hed_image, resized_img, flag):
+	#skeletonize the binarized image 
 	def skeletonization(img, ksize):
 		skel = numpy.zeros(img.shape,numpy.uint8)
 		size = numpy.size(img)
@@ -137,60 +140,72 @@ def hough_line(image, original_img, flag):
 			if zeros==size:
 				done = True
 		return skel
+	
+	#find the centroids of the line clusters
+	def merge_lines(coord):
+		try:
+			X = numpy.array(zip(coord,numpy.zeros(len(coord))), dtype=numpy.int)
+			bandwidth = estimate_bandwidth(X, quantile=0.1)
+			ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+			ms.fit(X)
+			labels = ms.labels_
+			cluster_centers = ms.cluster_centers_
 
-	def merge_lines(x_coord):
-		
-		X = numpy.array(zip(x_coord,numpy.zeros(len(x_coord))), dtype=numpy.int)
-		bandwidth = estimate_bandwidth(X, quantile=0.1)
-		ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
-		ms.fit(X)
-		labels = ms.labels_
-		cluster_centers = ms.cluster_centers_
+			labels_unique = numpy.unique(labels)
+			n_clusters_ = len(labels_unique)
 
-		labels_unique = numpy.unique(labels)
-		n_clusters_ = len(labels_unique)
+			final_coord = []
 
-		final_x_coord = []
+			for k in range(n_clusters_):
+				my_members = labels == k
+				final_coord.append(int(numpy.mean(X[my_members, 0])))
+			return final_coord
 
-		for k in range(n_clusters_):
-			my_members = labels == k
-			final_x_coord.append(int(numpy.mean(X[my_members, 0])))
-			#print "cluster {0}: {1}".format(k, X[my_members, 0])
-		return final_x_coord
+		except:
+			return []
 
 	#edges = cv2.Canny(image,200,250,apertureSize=3)
-	thresh, bw_img = cv2.threshold(image, BW_THRESHOLD, 255, cv2.THRESH_BINARY)
+	thresh, bw_img = cv2.threshold(Hed_image, BW_THRESHOLD, 255, cv2.THRESH_BINARY)
 
 	skel_img = skeletonization(bw_img, 3)
 	
 	if flag:
 		lines = cv2.HoughLinesP(image=skel_img,rho=1,theta=numpy.pi, threshold=HLP_THRESHOLD,lines=numpy.array([]), minLineLength=MIN_LINE_LENGTH,maxLineGap=MAX_LINE_GAP)
+		
 		num_lines,b,c = lines.shape
 		x_coord = []
+		
 		for i in range(num_lines):
 			x_coord.append(lines[i][0][0])
 			x_coord.append(lines[i][0][2])
-	
-		merged_xcoord = merge_lines(x_coord)
+		
+		if num_lines:
+			merged_xcoord = merge_lines(x_coord)
+			for i in range(len(merged_xcoord)):
+				cv2.line(resized_img, (merged_xcoord[i], 0), (merged_xcoord[i], 320), (0, 0, 255), 3, cv2.LINE_AA)
 
-		for i in range(len(merged_xcoord)):
-			cv2.line(original_img, (merged_xcoord[i], 0), (merged_xcoord[i], 320), (0, 0, 255), 3, cv2.LINE_AA)
+		#for i in range(num_lines):
+		#	cv2.line(resized_img, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 1, cv2.LINE_AA)
 
 	else:
 		lines = cv2.HoughLinesP(image=skel_img,rho=1,theta=numpy.pi/2, threshold=HLP_THRESHOLD,lines=numpy.array([]), minLineLength=MIN_LINE_LENGTH,maxLineGap=MAX_LINE_GAP)
 
 		num_lines,b,c = lines.shape
 		y_coord = []
+		
 		for i in range(num_lines):
 			y_coord.append(lines[i][0][1])
 			y_coord.append(lines[i][0][3])
 		
-		merged_ycoord = merge_lines(y_coord)
+		if num_lines:
+			merged_ycoord = merge_lines(y_coord)
+			for i in range(len(merged_ycoord)):
+				cv2.line(resized_img, (0, merged_ycoord[i]), (480, merged_ycoord[i]), (0, 0, 255), 1, cv2.LINE_AA)
 
-		for i in range(len(merged_ycoord)):
-			cv2.line(original_img, (0, merged_ycoord[i]), (480, merged_ycoord[i]), (0, 0, 255), 1, cv2.LINE_AA)
+		#for i in range(num_lines):
+		#	cv2.line(resized_img, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 1, cv2.LINE_AA)
 	
-	return original_img, bw_img, skel_img
+	return resized_img, bw_img, skel_img
 	
 #function obtained from https://github.com/sniklaus/pytorch-hed/run.py
 def estimate(tensorInput, moduleNetwork):
@@ -204,7 +219,7 @@ def estimate(tensorInput, moduleNetwork):
 	#return moduleNetwork(tensorInput.cuda().view(1, 3, intHeight, intWidth))[0, :, :, :].cpu()
 	return moduleNetwork(tensorInput.view(1, 3, intHeight, intWidth))[0, :, :, :].cpu()
 
-def line_detection(image, moduleNetwork, filename):
+def line_detection(image, moduleNetwork, viewpoint, img_id):
 	resized_img, flag = resize_image(image)
 
 	tensorInput = torch.FloatTensor(resized_img[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
@@ -213,16 +228,27 @@ def line_detection(image, moduleNetwork, filename):
 	
 	Hed_image = (tensorOutput.clamp(0.0, 1.0).numpy().transpose(1, 2, 0)[:, :, 0] * 255.0).astype(numpy.uint8)
 
-	cv2.imwrite('output/'+'hed'+filename, Hed_image)
+	#cv2.imwrite('output/'+ img_id + 'hed'+ viewpoint, Hed_image)
 
-	final_image, canny_image, skel_img = hough_line(Hed_image, resized_img, flag)
+	#print (img_id)
+	final_image, bw_img, skel_img = hough_line(Hed_image, resized_img, flag)
 
-	cv2.imwrite('output/'+filename,final_image)
-	cv2.imwrite('output/'+'c'+filename,canny_image)
-	cv2.imwrite('output/'+'skel'+filename,skel_img)
+	cv2.imwrite('output/'+ img_id + viewpoint, final_image)
+	#cv2.imwrite('output/' + img_id + 'c' + viewpoint, bw_img)
+	#cv2.imwrite('output/'+ img_id + 'skel'+ viewpoint, skel_img)
 	# plt.imshow(final_image)
 	# plt.show()
 
+def get_images_in_directory(path):
+	imgs = []
+	for f in os.listdir(path):
+		f_split  = os.path.splitext(f)
+		f_name = f_split[0]
+		ext = f_split[1]
+		if ext.lower() not in VALID_EXT:
+			continue
+		imgs.append(f)
+	return imgs
 
 def main():
 	argv = sys.argv
@@ -233,39 +259,49 @@ def main():
 		argv = argv[argv.index("--") + 1:]  # get all args after "--"
 	# When --help or no args are given, print this help
 	usage_text = (
-		"text1"	
-		"blender -- [options]"
+		"python line_detection.py -- [options]"
 	)
 
 	parser = argparse.ArgumentParser(description=usage_text)
 
 	parser.add_argument(
-		"-i", "--input_img", dest="orginal_img", type=str, required=True,
+		"-i", "--input_dir", dest="cuneiform_dir", type=str, required=True,
 		help="Input the rgb cuneiform image",
 	)
     
-
 	args = parser.parse_args(argv)
 
 	if not argv:
 		parser.print_help()
 		return
 
-	if (not args.orginal_img):
+	if (not args.cuneiform_dir):
 		print("Error: argument not given, aborting.")
 		parser.print_help()
 		return
-    
-	obverse, reverse = obv_rev_segmentation(args.orginal_img)
 
-	#uncomment the command below if you are utilising a nvidia gpu
-	#moduleNetwork = Network().cuda().eval()
+	'''
+	a = 'temp'
+	obverse, reverse = obv_rev_segmentation(args.cuneiform_dir)
+
 	
 	moduleNetwork = Network().eval()
-	line_detection(obverse, moduleNetwork, 'obverse_output.png')
-	line_detection(reverse, moduleNetwork, 'reverse_output.png')
+	line_detection(obverse, moduleNetwork, '_obverse.png', a)
+	line_detection(reverse, moduleNetwork, '_reverse.png', a)
+	'''
 
+	img_list = get_images_in_directory(args.cuneiform_dir)
+
+	for img_id in img_list:
+
+		obverse, reverse = obv_rev_segmentation(os.path.join(args.cuneiform_dir, img_id))
+
+		#uncomment the command below if you are utilising a nvidia gpu
+		#moduleNetwork = Network().cuda().eval()
+		moduleNetwork = Network().eval()
+		line_detection(obverse, moduleNetwork, '_obverse.png', img_id.split('.')[0])
+		line_detection(reverse, moduleNetwork, '_reverse.png', img_id.split('.')[0])
 	
-	
+
 if __name__ == '__main__':
 	sys.exit(main())

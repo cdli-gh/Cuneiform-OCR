@@ -1,2 +1,7 @@
-numpy
-opencv
+numpy=1.16.3
+scikit-learn=1.1.0
+matplotlib=2.2.4
+opencv==4.0.0
+torch==1.1.0
+torchvision
+imutils==1.1.0
