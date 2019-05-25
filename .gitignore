@@ -1,6 +1,5 @@
 line_detection/network-bsds500.pytorch
 line_detection/*.pyc
-output
 line_detection/transliteration_parser.py
 line_detection/transliteration_linecount.txt
 output_sparselines
