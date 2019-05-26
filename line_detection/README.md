@@ -22,8 +22,8 @@ python line_detection.py -- --i <cueniform image directory path>
 ## Expected Output
 img id = **P124776**
 
-<img src="https://i.imgur.com/9Gds4A3.jpg" width="200" height="401.5"> <img src="https://i.imgur.com/LBmxPmc.png" height="240" width="160">
-<img src="https://i.imgur.com/uH0RP3w.png" height="240" width="160">
+<img src="https://i.imgur.com/8ITicJk.png" width="200" height="401.5"> <img src="https://i.imgur.com/LBmxPmc.png" height="240" width="160">
+<img src="https://i.imgur.com/AGL0GsG.png" height="240" width="160">
 
 
 ## References
