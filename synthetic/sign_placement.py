@@ -173,8 +173,8 @@ def main():
 	sign_imgs = get_images("./input/signs/")
 	line_imgs = get_images("./input/line/")
 
-	#change dimensions according to the 3d model
-	bb_dimensions = [[400,490]] #,[496,520],[614,907],[760,890]
+	#change dimensions according to the 3d model_dimension
+	bb_dimensions = [[614,907]] #[400,490],[496,520],[614,907],[760,890]
 	bb_dimensions_s = random.sample(bb_dimensions, k=1)
 	bb_width = bb_dimensions_s[0][0]
 	bb_height = bb_dimensions_s[0][1]
@@ -187,7 +187,7 @@ def main():
 		black_board, char_height, line_coord = place_lines(black_board, line_imgs, num_lines, max_line)
 		black_board = place_signs(black_board, char_height, num_lines, line_coord, sign_imgs)
 		
-		cv2.imwrite("./input/templates/400x490/template_" + str(i) + ".png", black_board)
+		cv2.imwrite("./input/templates/614x907/template_" + str(i) + ".png", black_board)
 	
 if __name__ == "__main__":
 	sys.exit(main())
