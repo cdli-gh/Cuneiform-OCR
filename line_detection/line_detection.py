@@ -18,13 +18,18 @@ from pytorch_hed import Network
 from sklearn.cluster import MeanShift, estimate_bandwidth
 from os.path import isfile, join
 from os import listdir
-
+'''
 BW_THRESHOLD = 20
 HLP_THRESHOLD = 15
 MIN_LINE_LENGTH = 5
 MAX_LINE_GAP = 10
-VALID_EXT = [".jpg", ".png"]
+'''
 
+BW_THRESHOLD = 20
+HLP_THRESHOLD = 50
+MIN_LINE_LENGTH = 40
+MAX_LINE_GAP = 5
+VALID_EXT = [".jpg", ".png"]
 
 assert(int(str('').join(torch.__version__.split('.')[0:3])) >= 41) # requires at least pytorch version 0.4.1
 
@@ -167,7 +172,7 @@ def hough_line(Hed_image, resized_img, flag):
 	#edges = cv2.Canny(image,200,250,apertureSize=3)
 	thresh, bw_img = cv2.threshold(Hed_image, BW_THRESHOLD, 255, cv2.THRESH_BINARY)
 
-	skel_img = skeletonization(bw_img, 3)
+	skel_img = skeletonization(Hed_image, 3)
 	
 	if flag:
 		lines = cv2.HoughLinesP(image=skel_img,rho=1,theta=numpy.pi, threshold=HLP_THRESHOLD,lines=numpy.array([]), minLineLength=MIN_LINE_LENGTH,maxLineGap=MAX_LINE_GAP)
@@ -179,13 +184,13 @@ def hough_line(Hed_image, resized_img, flag):
 			x_coord.append(lines[i][0][0])
 			x_coord.append(lines[i][0][2])
 		
-		if num_lines:
-			merged_xcoord = merge_lines(x_coord)
-			for i in range(len(merged_xcoord)):
-				cv2.line(resized_img, (merged_xcoord[i], 0), (merged_xcoord[i], 320), (0, 0, 255), 3, cv2.LINE_AA)
+		# if num_lines:
+		# 	merged_xcoord = merge_lines(x_coord)
+		# 	for i in range(len(merged_xcoord)):
+		# 		cv2.line(resized_img, (merged_xcoord[i], 0), (merged_xcoord[i], 320), (0, 0, 255), 3, cv2.LINE_AA)
 
-		#for i in range(num_lines):
-		#	cv2.line(resized_img, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 1, cv2.LINE_AA)
+		for i in range(num_lines):
+			cv2.line(resized_img, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 1, cv2.LINE_AA)
 
 	else:
 		lines = cv2.HoughLinesP(image=skel_img,rho=1,theta=numpy.pi/2, threshold=HLP_THRESHOLD,lines=numpy.array([]), minLineLength=MIN_LINE_LENGTH,maxLineGap=MAX_LINE_GAP)
@@ -197,13 +202,13 @@ def hough_line(Hed_image, resized_img, flag):
 			y_coord.append(lines[i][0][1])
 			y_coord.append(lines[i][0][3])
 		
-		if num_lines:
-			merged_ycoord = merge_lines(y_coord)
-			for i in range(len(merged_ycoord)):
-				cv2.line(resized_img, (0, merged_ycoord[i]), (480, merged_ycoord[i]), (0, 0, 255), 1, cv2.LINE_AA)
+		# if num_lines:
+		# 	merged_ycoord = merge_lines(y_coord)
+		# 	for i in range(len(merged_ycoord)):
+		# 		cv2.line(resized_img, (0, merged_ycoord[i]), (480, merged_ycoord[i]), (0, 0, 255), 1, cv2.LINE_AA)
 
-		#for i in range(num_lines):
-		#	cv2.line(resized_img, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 1, cv2.LINE_AA)
+		for i in range(num_lines):
+			cv2.line(resized_img, (lines[i][0][0], lines[i][0][1]), (lines[i][0][2], lines[i][0][3]), (0, 0, 255), 1, cv2.LINE_AA)
 	
 	return resized_img, bw_img, skel_img
 	
@@ -230,14 +235,11 @@ def line_detection(image, moduleNetwork, viewpoint, img_id):
 
 	#cv2.imwrite('output/'+ img_id + 'hed'+ viewpoint, Hed_image)
 
-	#print (img_id)
 	final_image, bw_img, skel_img = hough_line(Hed_image, resized_img, flag)
 
 	cv2.imwrite('output/'+ img_id + viewpoint, final_image)
 	#cv2.imwrite('output/' + img_id + 'c' + viewpoint, bw_img)
 	#cv2.imwrite('output/'+ img_id + 'skel'+ viewpoint, skel_img)
-	# plt.imshow(final_image)
-	# plt.show()
 
 def get_images_in_directory(path):
 	imgs = []
@@ -288,8 +290,8 @@ def main():
 	moduleNetwork = Network().eval()
 	line_detection(obverse, moduleNetwork, '_obverse.png', a)
 	line_detection(reverse, moduleNetwork, '_reverse.png', a)
+	
 	'''
-
 	img_list = get_images_in_directory(args.cuneiform_dir)
 
 	for img_id in img_list:
