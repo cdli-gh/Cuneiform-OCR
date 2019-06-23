@@ -5,10 +5,6 @@
 All the pre-requisite libraries can be found in requirements.txt
 Download the B/W sign and line images from here: https://drive.google.com/open?id=1g4JeaJrmQ8K_fh_TOYeAyd6s6grqH2Dr
 
-input--- signs
-     \-- line
-     \-- templates
-
 ## Usage
 
 To generate gradient augmented signs:
