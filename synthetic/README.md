@@ -21,4 +21,4 @@ Dimensions of the template(width/height) can be adjusted in the code.
 
 ## Expected Output
 
-<img src="https://i.imgur.com/EVLYMPA.png" width="200" height="245"> <img src="https://i.imgur.com/d8vurLg.png" width="200" height="245">
+<img src="https://i.imgur.com/EVLYMPA.png" width="200" height="245"> <img src="https://i.imgur.com/d8vurLg.png" width="200" height="245"> <img src="https://i.imgur.com/4Y4T297.png" width="200" height="245"> <img src="https://i.imgur.com/SwablId.png" width="200" height="245">
