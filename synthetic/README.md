@@ -4,7 +4,10 @@
 
 All the pre-requisite libraries can be found in requirements.txt.
 
-Download the B/W sign and line images from here: https://drive.google.com/open?id=1g4JeaJrmQ8K_fh_TOYeAyd6s6grqH2Dr
+Download dataset for synthetic image generation: https://drive.google.com/open?id=1g4JeaJrmQ8K_fh_TOYeAyd6s6grqH2Dr
+
+The above includes 78 cuneiform signs with augmented variants, line images.
+
 
 ## Usage
 
@@ -21,4 +24,8 @@ Dimensions of the template(width/height) can be adjusted in the code.
 
 ## Expected Output
 
-<img src="https://i.imgur.com/EVLYMPA.png" width="200" height="245"> <img src="https://i.imgur.com/d8vurLg.png" width="200" height="245"> <img src="https://i.imgur.com/4Y4T297.png" width="200" height="245"> <img src="https://i.imgur.com/SwablId.png" width="200" height="245">
+Final generate templates can be downloaded here:
+
+<img src="https://i.imgur.com/TByxMc7.png" width="200" height="245"> <img src="https://i.imgur.com/BWK06iG.png" width="200" height="245"> <img src="https://i.imgur.com/qaDqpMf.png" width="200" height="245"> <img src="https://i.imgur.com/iPdX9Hn.png" width="200" height="245">
+
+<img src="https://i.imgur.com/X9xUYAp.png" width="200" height="245"> <img src="https://i.imgur.com/snBNcLM.png" width="200" height="245"> <img src="https://i.imgur.com/wTzzexK.png" width="200" height="245"> <img src="https://i.imgur.com/TTm4lx6.png" width="200" height="245">
