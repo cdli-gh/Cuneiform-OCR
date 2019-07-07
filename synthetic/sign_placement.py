@@ -6,7 +6,8 @@ import sys
 import random
 import copy
 
-LINE_HEIGHT = 15
+#15
+LINE_HEIGHT = 40
 CHAR_HEIGHT_SHIFT = 7
 
 #placing signs on template after lines are placed
@@ -41,7 +42,7 @@ def place_signs(black_board, char_height, num_lines, line_coord, sign_imgs):
 				break
 			col_index.append(j)
 
-		for i in xrange(character.shape[1]-1, -1, -1):
+		for j in xrange(character.shape[1]-1, -1, -1):
 			col = character[:,j]
 			if np.max(col) > 0:
 				break
@@ -56,10 +57,10 @@ def place_signs(black_board, char_height, num_lines, line_coord, sign_imgs):
 
 		return character
 	#draw character on to the template
-	def draw_char(black_board, y_offset):
+	def draw_char(black_board, y_offset, chars):
 		remaining_width = black_board.shape[1]
 		list_chars = []
-
+		list_names = []
 		#fill the lines with characters, and find excess padding in the line
 		while remaining_width > 0:
 			sign_img = random.sample(sign_imgs, k=1)
@@ -70,11 +71,13 @@ def place_signs(black_board, char_height, num_lines, line_coord, sign_imgs):
 				break
 			resized = cv2.resize(image, (char_width, char_height), interpolation = cv2.INTER_AREA)		
 			list_chars.append(resized)
+			list_names.append(sign_img[0].split("/")[-1])
 			remaining_width = remaining_width - char_width
 
 		x_offset = 0
 		#use the excess padding for each character's left margin
-		for img in list_chars:
+
+		for index,img in enumerate(list_chars):
 			if random.randint(0, 2): # 1 in 3 characters will be ignored
 				left_margin = random.randint(0, remaining_width)
 				remaining_width -= left_margin
@@ -83,11 +86,14 @@ def place_signs(black_board, char_height, num_lines, line_coord, sign_imgs):
 					for j in range(x_offset, x_offset + img.shape[1]):
 						val = max(img[i-y_offset][j-x_offset], black_board[i,j])
 						black_board[i,j] = val
+
+				chars.append([list_names[index],x_offset, y_offset, img.shape[1],img.shape[0]])
 				x_offset += img.shape[1]
 
-		return black_board
+		return black_board, chars
 
-	char_height -= (LINE_HEIGHT + CHAR_HEIGHT_SHIFT)
+	# char_height -= (LINE_HEIGHT + CHAR_HEIGHT_SHIFT)
+	chars = []
 	line_coord = [0] + line_coord + [black_board.shape[0]]
 	partition_height = [line_coord[i] - line_coord[i-1] for i in range(1, len(line_coord))]
 
@@ -98,13 +104,13 @@ def place_signs(black_board, char_height, num_lines, line_coord, sign_imgs):
 			for r in range(0,num_rows):
 				if random.randint(0, 2): # 1 in 3 lines will be ignored
 					y = int(line_coord[i] + ((partition_height[i] * (r*2+1)) / (num_rows*2)) - (char_height / 2))
-					black_board = draw_char(black_board, y)
+					black_board, chars = draw_char(black_board, y, chars)
 
 		else:
 			y = int(line_coord[i] + (partition_height[i] / 2) - (char_height / 2))
-			black_board = draw_char(black_board, y)
+			black_board, chars = draw_char(black_board, y, chars)
 
-	return black_board
+	return black_board, chars
 
 #draw the lines on the template
 def place_lines(black_board, line_imgs, num_lines, max_line):
@@ -112,6 +118,8 @@ def place_lines(black_board, line_imgs, num_lines, max_line):
 	top = 0
 	char_height = int(black_board.shape[0] / (max_line + 1))
 	line_coord = []
+	lines = []
+	line_toggle = random.randint(0, 30)
 	for i in range(0,num_lines):
 
 		line_img = random.sample(line_imgs, k=1)
@@ -125,27 +133,29 @@ def place_lines(black_board, line_imgs, num_lines, max_line):
 		bottom = black_board.shape[0] - (char_height * (num_lines - i))
 
 		y_offset = random.randint(top, bottom)
-		black_board[y_offset:y_offset+resized.shape[0],0:resized.shape[1]] = resized
+		if line_toggle:
+			black_board[y_offset:y_offset+resized.shape[0],0:resized.shape[1]] = resized
 		line_coord.append(y_offset)
 		top = y_offset
-	
-	return black_board, char_height, line_coord
+		lines.append([0,y_offset,width,height])
+
+	return black_board, char_height, line_coord, lines
 
 #output the number of lines to be drawn on the template depending on template size
 #you can change the probablities of the number of lines to be drawn while generating templates
 def get_num_lines(dim):
 	if dim == (400,490):
-		num_lines = random.sample([2]+[3]+[4]*3+[5]*5+[6]*6, k=1)[0]
-		max_line = 6
+		num_lines = random.sample([2]*2+[3]*2+[4]*3+[5]*2, k=1)[0]
+		max_line = 5
 	elif dim == (496,520):
-		num_lines = random.sample([2]+[3]+[4]*3+[5]*5+[6]*6+[7]*7, k=1)[0]
+		num_lines = random.sample([2]+[3]+[4]*3+[5]*5+[6]*6+[7]*4, k=1)[0]
 		max_line = 7
 	elif dim == (614,907):
-		num_lines = random.sample([2]+[3]+[4]*2+[5]*3+[6]*2+[7]*4+[8]*4+[9]*4+[10]*5+[11]*4+[12]*5+[13]*6, k=1)[0]
-		max_line = 13
+		num_lines = random.sample([2]+[3]*2+[4]*4+[5]*5+[6]*5+[7]*6+[8]*5+[9]*2, k=1)[0]
+		max_line = 9
 	elif dim == (760,890):
-		num_lines = random.sample([2]+[3]+[4]*2+[5]*2+[6]*5+[7]*6+[8]*4+[9]*5+[10]*7, k=1)[0]
-		max_line = 10
+		num_lines = random.sample([2]+[3]*2+[4]*4+[5]*2+[6]*6+[7]*5+[8]*3, k=1)[0]
+		max_line = 8
 	return num_lines, max_line
 
 
@@ -168,26 +178,45 @@ def get_images(root):
 			break
 	return imgs
 
+def annotation_formatting(array):
+	output = ""
+	for val in array:
+		for i in val:
+			output += str(i) + ":"
+		output = output[0:-1]
+		output += "-"
+	output = output[0:-1]
+	return output		
+
 def main():
 
-	sign_imgs = get_images("./input/signs/")
-	line_imgs = get_images("./input/line/")
+	sign_imgs = get_images("./input/signs1/")
+	line_imgs = get_images("./input/line1/")
 
+	file_path = open("./input/templates/annotation.csv", "w")
 	#change dimensions according to the 3d model_dimension
-	bb_dimensions = [[614,907]] #[400,490],[496,520],[614,907],[760,890]
-	bb_dimensions_s = random.sample(bb_dimensions, k=1)
-	bb_width = bb_dimensions_s[0][0]
-	bb_height = bb_dimensions_s[0][1]
-	
-	for i in range(0,11):
+	for i in range(0,2000):
+		bb_dimensions = [[400,490],[496,520],[614,907],[760,890]]
+		bb_dimensions_s = random.sample(bb_dimensions, k=1)
+		bb_width = bb_dimensions_s[0][0]
+		bb_height = bb_dimensions_s[0][1]
+		
 		num_lines, max_line = get_num_lines((bb_width, bb_height))
 
 		black_board = np.zeros((bb_height,bb_width), np.uint8)
 
-		black_board, char_height, line_coord = place_lines(black_board, line_imgs, num_lines, max_line)
-		black_board = place_signs(black_board, char_height, num_lines, line_coord, sign_imgs)
+		black_board, char_height, line_coord, lines = place_lines(black_board, line_imgs, num_lines, max_line)
 		
-		cv2.imwrite("./input/templates/614x907/template_" + str(i) + ".png", black_board)
-	
+		black_board, chars = place_signs(black_board, char_height, num_lines, line_coord, sign_imgs)
+		
+		#400x490 496x520 614x907 760x890
+		dir_path = str(bb_width) + "x" + str(bb_height)
+		filename = str(i) + ".png"
+		cv2.imwrite("./input/templates/" + dir_path + "/" + filename, black_board)
+		file_path.write(dir_path + "," + filename + "," + str(len(lines)) + "," + annotation_formatting(lines) + "," + str(len(chars)) + "," +annotation_formatting(chars) + "\n")
+
+
+	file_path.close()
+
 if __name__ == "__main__":
 	sys.exit(main())
