@@ -14,7 +14,7 @@ The above includes 78 cuneiform signs with augmented variants and line images.
 To generate gradient augmented signs:
 
 ```
-python sign_gradient_generation.py './input/signs/'
+python sign_gradient_generation.py './input/signs1/'
 ```
 
 After the gradient augmented signs are generated, run ```python sign_placement.py``` to generate the templates with lines and cuneiform signs placed. 
