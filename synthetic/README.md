@@ -26,6 +26,6 @@ Dimensions of the template(width/height) can be adjusted in the code.
 
 Final generate templates can be downloaded here:
 
-<img src="https://i.imgur.com/TByxMc7.png" width="200" height="245"> <img src="https://i.imgur.com/BWK06iG.png" width="200" height="245"> <img src="https://i.imgur.com/qaDqpMf.png" width="200" height="245"> <img src="https://i.imgur.com/iPdX9Hn.png" width="200" height="245">
+<img src="https://i.imgur.com/TByxMc7.png" width="200" height="245"> <img src="https://i.imgur.com/BWK06iG.png" width="204.6" height="302"> <img src="https://i.imgur.com/qaDqpMf.png" width="165" height="173"> <img src="https://i.imgur.com/iPdX9Hn.png" width="217" height="254">
 
-<img src="https://i.imgur.com/X9xUYAp.png" width="200" height="245"> <img src="https://i.imgur.com/snBNcLM.png" width="200" height="245"> <img src="https://i.imgur.com/wTzzexK.png" width="200" height="245"> <img src="https://i.imgur.com/TTm4lx6.png" width="200" height="245">
+<img src="https://i.imgur.com/X9xUYAp.png" width="200" height="245"> <img src="https://i.imgur.com/snBNcLM.png" width="204.6" height="302"> <img src="https://i.imgur.com/wTzzexK.png" width="165" height="173"> <img src="https://i.imgur.com/TTm4lx6.png" width="217" height="254">
