@@ -14,3 +14,4 @@ python real_test.py -- -isynth /path/to/test images/ -iweight /path/to/weight_fi
 * For real images: detected sign coordinates in txt files are generated. For ground-truth coordinates in txt files, corresponding signs should be
   labelled on real images using [BBox Label tool](https://github.com/puzzledqs/BBox-Label-Tool). We can then use mAP tool to find mAP, loss avg.
   
+<img src="https://i.imgur.com/GUxi8eY.jpg" width="300" height="401.5"> <img src="https://i.imgur.com/hwTFYrb.jpg" width="300" height="401.5"> <img src="https://i.imgur.com/FY7pKtj.jpg" width="300" height="401.5">
