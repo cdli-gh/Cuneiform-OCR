@@ -41,7 +41,7 @@ def place_signs(black_board, char_height, num_lines, line_coord, sign_imgs):
 			if np.max(col) > 0:
 				break
 			col_index.append(j)
-
+		
 		for j in xrange(character.shape[1]-1, -1, -1):
 			col = character[:,j]
 			if np.max(col) > 0:
