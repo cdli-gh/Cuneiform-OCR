@@ -13,13 +13,19 @@ This is an implementation of [Mask R-CNN](https://arxiv.org/abs/1703.06870) on P
 
 * ([model.py](mrcnn/model.py), [utils.py](mrcnn/utils.py), [config.py](mrcnn/config.py)): These files contain the main Mask RCNN implementation. 
 
-# Training on Cuneiform Images
+# Training on synthetic Cuneiform Images
 
 ```
 # To train a model
 python3 samples/cuneiform/cuneiform.py train --dataset=/path/to/cuneiform_images/ --model=/path/to/weights
 ```
 The training schedule, learning rate, and other parameters should be set in `samples/cuneiform/cuneiform.py`.
+
+# Test on real Cuneiform Images
+
+```
+python mrcnn/real_test.py -- -isynth /path/to/test images/ -iweight /path/to/weight_file -iresults /path/to/results_folder 
+```
 
 ## Requirements
 Python 3.4, TensorFlow 1.3, Keras 2.0.8 and other common packages listed in `requirements.txt`.
