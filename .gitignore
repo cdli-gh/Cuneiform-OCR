@@ -5,3 +5,6 @@ line_detection/transliteration_linecount.txt
 line_detection/output_sparselines
 line_detection/output
 synthetic/input
+object-detection/Mask_RCNN/samples/demo.ipynb
+object-detection/Mask_RCNN/samples/cuneiform/inspect_balloon_data.ipynb
+object-detection/Mask_RCNN/samples/cuneiform/inspect_balloon_model.ipynb
